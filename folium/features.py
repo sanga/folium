@@ -336,11 +336,17 @@ class GeoJson(Layer):
 
         self._template = Template(u"""
             {% macro script(this, kwargs) %}
+                function onEachFeature(feature, layer) {
+                                                      // does this feature have a property named popupContent?
+                                                      if (feature.properties && feature.properties.popupContent) {
+                                                          layer.bindPopup(feature.properties.popupContent);
+                                                      }
+                                                  }
                 var {{this.get_name()}} = L.geoJson(
                     {% if this.embed %}{{this.style_data()}}{% else %}"{{this.data}}"{% endif %}
                     {% if this.smooth_factor is not none %}
                         , {smoothFactor:{{this.smooth_factor}}}
-                    {% endif %}).addTo({{this._parent.get_name()}});
+                    {% endif %}, {onEachFeature: onEachFeature}).addTo({{this._parent.get_name()}});
                 {{this.get_name()}}.setStyle(function(feature) {return feature.properties.style;});
             {% endmacro %}
             """)  # noqa
